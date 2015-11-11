@@ -10,18 +10,15 @@
 //-----------------------------------------------------------------------------
 
 template<typename BinaryOp, typename Result>
-struct BalancedAccumulator
+class BalancedAccumulator
 {
+public:
    BalancedAccumulator(BinaryOp op, size_t counter_size)
       : m_op(op)
       , m_results(counter_size)
-      , m_marked(counter_size)
+      , m_marked(counter_size, false)
    {}
    
-   BinaryOp            m_op;
-   std::vector<Result> m_results;
-   std::vector<bool>   m_marked;
-
    void add(Result res)
    {
       for (size_t i = 0; i < m_marked.size(); ++i)
@@ -45,6 +42,11 @@ struct BalancedAccumulator
             res = m_op(res, m_results[i - 1]);
       return res;
    }
+
+private:
+   BinaryOp            m_op;
+   std::vector<Result> m_results;
+   std::vector<bool>   m_marked;
 };
 
 template<typename FwdIterator, typename Result, typename BinaryOp>
