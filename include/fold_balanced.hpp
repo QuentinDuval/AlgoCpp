@@ -1,6 +1,9 @@
 #ifndef FOLD_BALANCED_HPP
 #define FOLD_BALANCED_HPP
 
+#include <algorithm>
+#include <numeric>
+
 
 //-----------------------------------------------------------------------------
 // Version of accumulate with balance (group elements by number of accumulation)
@@ -14,47 +17,44 @@ class BalancedAccumulator
 {
 public:
    BalancedAccumulator(BinaryOp op, size_t counter_size)
-      : m_op(op)
-      , m_results(counter_size)
-      , m_marked(counter_size, false)
-   {}
-   
-   void add(Result res)
+      : m_op(op), m_results(), m_count(0)
    {
-      for (size_t i = 0; i < m_marked.size(); ++i)
+      m_results.reserve(counter_size);
+   }
+   
+   void operator()(Result res)
+   {
+      size_t relative_count = m_count++;
+      while (true)
       {
-         if (!m_marked[i])
+         if (relative_count % 2 == 0)
          {
-            m_marked[i] = true;
-            m_results[i] = res;
+            m_results.push_back(res);
             return;
          }
 
-         res = m_op(m_results[i], res);
-         m_marked[i] = false;
+         res = m_op(m_results.back(), res);
+         m_results.pop_back();
+         relative_count = relative_count / 2;
       }
    }
 
    Result finalize(Result res)
    {
-      for (size_t i = m_marked.size(); i != 0; --i)
-         if (m_marked[i - 1])
-            res = m_op(res, m_results[i - 1]);
-      return res;
+      return std::accumulate(begin(m_results), end(m_results), res, m_op);
    }
 
 private:
    BinaryOp            m_op;
    std::vector<Result> m_results;
-   std::vector<bool>   m_marked;
+   size_t              m_count;
 };
 
 template<typename FwdIterator, typename Result, typename BinaryOp>
 Result fold_balanced(FwdIterator first, FwdIterator last, Result init, BinaryOp op)
 {
    BalancedAccumulator<BinaryOp, Result> accOp(op, 64);
-   for (; first != last; ++first)
-      accOp.add(*first);
+   std::for_each(first, last, std::ref(accOp));
    return accOp.finalize(init);
 }
 
