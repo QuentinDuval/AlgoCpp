@@ -29,7 +29,7 @@ public:
       {
          if (relative_count % 2 == 0)
          {
-            m_results.push_back(res);
+            m_results.push_back(std::move(res));
             return;
          }
 
