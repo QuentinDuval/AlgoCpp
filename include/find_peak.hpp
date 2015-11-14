@@ -9,7 +9,7 @@
 // Complexity is O(log(n))
 //-----------------------------------------------------------------------------
 
-template <
+template<
    typename RandomAccessIterator,
    typename Less = std::less<typename std::iterator_traits<RandomAccessIterator>::value_type>
 >
@@ -41,7 +41,7 @@ auto find_peak_rec(Container const& container, Less less = Less())
 
 //-----------------------------------------------------------------------------
 
-template <
+template<
    typename RandomAccessIterator,
    typename Less = std::less<typename std::iterator_traits<RandomAccessIterator>::value_type>
 >
