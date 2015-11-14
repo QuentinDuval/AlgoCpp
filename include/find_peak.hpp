@@ -15,17 +15,15 @@ template <
 >
 RandomAccessIterator find_peak_rec(RandomAccessIterator first, RandomAccessIterator last, Less less = Less())
 {
-   using Diff = typename std::iterator_traits<RandomAccessIterator>::difference_type;
-   Diff dist = std::distance(first, last);
-   RandomAccessIterator curr = first + dist / 2;
+   auto curr = first + std::distance(first, last) / 2;
    if (curr == first)
       return curr;
    
-   RandomAccessIterator prev = curr - 1;
+   auto prev = curr - 1;
    if (less(*curr, *prev))
       return find_peak_rec(first, curr, less);
 
-   RandomAccessIterator next = curr + 1;
+   auto next = curr + 1;
    if (less(*curr, *next))
       return find_peak_rec(next, last, less);
 
@@ -47,22 +45,20 @@ template <
 >
 RandomAccessIterator find_peak(RandomAccessIterator first, RandomAccessIterator last, Less less = Less())
 {
-   using Diff = typename std::iterator_traits<RandomAccessIterator>::difference_type;
    while (true)
    {
-      Diff dist = std::distance(first, last);
-      RandomAccessIterator curr = first + dist / 2;
+      auto curr = first + std::distance(first, last) / 2;
       if (curr == first)
          return curr;
 
-      RandomAccessIterator prev = curr - 1;
+      auto prev = curr - 1;
       if (less(*curr, *prev))
       {
          last = curr;
          continue;
       }
 
-      RandomAccessIterator next = curr + 1;
+      auto next = curr + 1;
       if (less(*curr, *next))
       {
          first = next;
