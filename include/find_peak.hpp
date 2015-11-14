@@ -41,7 +41,23 @@ template<typename ForwardIterator, typename Less>
 auto find_peak_rec_impl(ForwardIterator first, ForwardIterator last,
                         Less less, std::bidirectional_iterator_tag)
 {
-   return first;
+   if (first == last)
+      return first;
+
+   auto prev = first++;
+   if (less(*first, *prev))
+      return prev;
+
+   for (; first != last; ++prev)
+   {
+      auto curr = first++;
+      if (first == last)
+         return curr;
+
+      if (less(*prev, *curr) && less(*first, *curr))
+         return curr;
+   }
+   return prev;
 }
 
 template<typename Iterator, typename Less = DefLessIter<Iterator>>
@@ -78,9 +94,9 @@ auto find_peak_impl(RandomAccessIterator first, RandomAccessIterator last,
 
 template<typename ForwardIterator, typename Less>
 auto find_peak_impl(ForwardIterator first, ForwardIterator last,
-                    Less less, std::bidirectional_iterator_tag)
+                    Less less, std::bidirectional_iterator_tag tag)
 {
-   return first;
+   return find_peak_rec_impl(first, last, less, tag);
 }
 
 template<typename Iterator, typename Less = DefLessIter<Iterator>>
