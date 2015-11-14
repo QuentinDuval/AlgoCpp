@@ -5,14 +5,21 @@
 
 
 //-----------------------------------------------------------------------------
+
+template<typename Iterator>
+using DefLessIter = std::less<typename std::iterator_traits<Iterator>::value_type>;
+
+template<typename Container>
+using DefLessCont = std::less<typename Container::value_type>;
+
+
+//-----------------------------------------------------------------------------
 // Find the peak of a function, for random access iterators (binary search use)
 // Complexity is O(log(n))
 //-----------------------------------------------------------------------------
 
-template<
-   typename RandomAccessIterator,
-   typename Less = std::less<typename std::iterator_traits<RandomAccessIterator>::value_type>
->
+template<typename RandomAccessIterator,
+         typename Less = DefLessIter<RandomAccessIterator>>
 RandomAccessIterator find_peak_rec(RandomAccessIterator first, RandomAccessIterator last, Less less = Less())
 {
    auto curr = first + std::distance(first, last) / 2;
@@ -30,10 +37,7 @@ RandomAccessIterator find_peak_rec(RandomAccessIterator first, RandomAccessItera
    return curr;
 }
 
-template<
-   typename Container,
-   typename Less = std::less<typename Container::value_type>
->
+template<typename Container, typename Less = DefLessCont<Container>>
 auto find_peak_rec(Container const& container, Less less = Less())
 {
    return find_peak_rec(begin(container), end(container), less);
@@ -41,10 +45,8 @@ auto find_peak_rec(Container const& container, Less less = Less())
 
 //-----------------------------------------------------------------------------
 
-template<
-   typename RandomAccessIterator,
-   typename Less = std::less<typename std::iterator_traits<RandomAccessIterator>::value_type>
->
+template<typename RandomAccessIterator,
+         typename Less = DefLessIter<RandomAccessIterator>>
 RandomAccessIterator find_peak(RandomAccessIterator first, RandomAccessIterator last, Less less = Less())
 {
    while (true)
@@ -61,10 +63,7 @@ RandomAccessIterator find_peak(RandomAccessIterator first, RandomAccessIterator 
    }
 }
 
-template<
-   typename Container,
-   typename Less = std::less<typename Container::value_type>
->
+template<typename Container, typename Less = DefLessCont<Container>>
 auto find_peak(Container const& container, Less less = Less())
 {
    return find_peak(begin(container), end(container), less);
