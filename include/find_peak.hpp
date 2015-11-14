@@ -30,9 +30,11 @@ RandomAccessIterator find_peak_rec(RandomAccessIterator first, RandomAccessItera
    return curr;
 }
 
-template<typename Container,
-         typename Less = std::less<typename Container::value_type>>
-typename Container::const_iterator find_peak_rec(Container const& container, Less less = Less())
+template<
+   typename Container,
+   typename Less = std::less<typename Container::value_type>
+>
+auto find_peak_rec(Container const& container, Less less = Less())
 {
    return find_peak_rec(begin(container), end(container), less);
 }
@@ -59,9 +61,11 @@ RandomAccessIterator find_peak(RandomAccessIterator first, RandomAccessIterator 
    }
 }
 
-template<typename Container,
-   typename Less = std::less<typename Container::value_type >>
-   typename Container::const_iterator find_peak(Container const& container, Less less = Less())
+template<
+   typename Container,
+   typename Less = std::less<typename Container::value_type>
+>
+auto find_peak(Container const& container, Less less = Less())
 {
    return find_peak(begin(container), end(container), less);
 }
