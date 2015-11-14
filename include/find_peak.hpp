@@ -53,12 +53,9 @@ RandomAccessIterator find_peak(RandomAccessIterator first, RandomAccessIterator 
 
       auto prev = curr - 1;
       auto next = curr + 1;
-      if (less(*curr, *prev))
-         last = curr;
-      else if (less(*curr, *next))
-         first = next;
-      else
-         return curr;
+      if      (less(*curr, *prev))  last = curr;
+      else if (less(*curr, *next))  first = next;
+      else                          return curr;
    }
 }
 
