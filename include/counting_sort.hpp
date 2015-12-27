@@ -11,29 +11,30 @@
 // Sort in linear time, if the inputs can be projected in [0..M] integer space
 //-----------------------------------------------------------------------------
 
-template<typename InoutIterator, typename IntegerProjection>
+template<typename InoutIterator, typename ProjectionIt>
 void counting_sort(InoutIterator first, InoutIterator last,
-                   IntegerProjection proj, size_t max_proj_value)
+                   ProjectionIt proj_first, ProjectionIt proj_last)
 {
+   if (first == last)
+      return;
+
    using ValueType = typename std::iterator_traits<InoutIterator>::value_type;
-   std::vector<std::vector<ValueType>> counts(max_proj_value + 1);
-   for (auto curr = first; curr != last; ++curr)
-      counts[proj(curr)].push_back(*curr);
+   auto max_proj_value = std::max_element(proj_first, proj_last);
+
+   std::vector<std::vector<ValueType>> counts(*max_proj_value + 1);
+   for (auto curr = first; curr != last; ++curr, ++proj_first)
+      counts[*proj_first].push_back(*curr);
 
    for (auto& vals : counts)
       first = std::copy(begin(vals), end(vals), first);
 }
 
-template<typename InoutIterator, typename IntegerProjection>
-void counting_sort(InoutIterator first, InoutIterator last, IntegerProjection proj)
+template<typename InoutIterator, typename Projection>
+void counting_sort(InoutIterator first, InoutIterator last, Projection proj)
 {
-   if (first == last)
-      return;
-
    std::vector<size_t> proj_values;
    std::transform(first, last, std::back_inserter(proj_values), proj);
-   auto max_proj_value = std::max_element(begin(proj_values), end(proj_values));
-   counting_sort(first, last, proj, *max_proj_value);
+   counting_sort(first, last, begin(proj_values), end(proj_values));
 }
 
 
