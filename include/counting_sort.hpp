@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <map>
 #include <vector>
 
 
@@ -19,11 +20,13 @@ void counting_sort(InoutIterator first, InoutIterator last,
       return;
 
    using ValueType = typename std::iterator_traits<InoutIterator>::value_type;
-   auto max_proj_value = std::max_element(proj_first, proj_last);
+   auto proj_value_range = std::minmax_element(proj_first, proj_last);
+   auto min_proj = *proj_value_range.first;
+   auto max_proj = *proj_value_range.second;
 
-   std::vector<std::vector<ValueType>> counts(*max_proj_value + 1);
+   std::vector<std::vector<ValueType>> counts(max_proj - min_proj + 1);
    for (auto curr = first; curr != last; ++curr, ++proj_first)
-      counts[*proj_first].push_back(std::move(*curr));
+      counts[*proj_first - min_proj].push_back(std::move(*curr));
 
    for (auto& vals : counts)
       first = std::move(begin(vals), end(vals), first);
