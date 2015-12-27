@@ -40,4 +40,54 @@ void counting_sort(InoutIterator first, InoutIterator last, Projection proj)
 }
 
 
+//-----------------------------------------------------------------------------
+// Counting sort in place for random access iterators
+// Sort in linear time, if the inputs can be projected in [0..M] integer space
+//-----------------------------------------------------------------------------
+
+template<typename InoutIterator, typename Projection>
+void counting_sort_in_place(InoutIterator first, InoutIterator last, Projection proj)
+{
+   if (first == last)
+      return;
+
+   using ValueType = typename std::iterator_traits<InoutIterator>::value_type;
+   auto proj_value_range = std::minmax_element(first, last, [&proj](auto& lhs, auto& rhs) { return proj(lhs) < proj(rhs); });
+   auto min_proj = proj(*proj_value_range.first);
+   auto max_proj = proj(*proj_value_range.second);
+   auto proj_gap = max_proj - min_proj + 1;
+
+   //Cout each occurrences
+   std::vector<size_t> counts(proj_gap);
+   for (auto curr = first; curr != last; ++curr)
+      counts[proj(*curr) - min_proj] += 1;
+
+   //Compute the ranges
+   std::vector<InoutIterator> starts(proj_gap, first);
+   for (decltype(proj_gap) i = 1; i < proj_gap; ++i)
+      starts[i] = starts[i - 1] + counts[i - 1];
+   std::vector<InoutIterator> ends = starts;
+
+   //Loop on the ranges
+   for (decltype(proj_gap) i = 0; i < proj_gap - 1; ++i)
+   {
+      while (ends[i] != starts[i+1])
+      {
+         auto& elem = *(ends[i]);
+         auto proj_val = proj(elem) - min_proj;
+         if (proj_val == i)
+         {
+            ++(ends[i]);
+         }
+         else
+         {
+            std::swap(elem, *ends[proj_val]);
+            ++(ends[proj_val]);
+         }
+      }
+   }
+}
+
+
+
 #endif
