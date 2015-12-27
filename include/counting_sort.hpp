@@ -65,7 +65,7 @@ void counting_sort_in_place(InoutIterator first, InoutIterator last, Projection 
    //Compute the ranges
    std::vector<InoutIterator> starts(proj_gap, first);
    for (decltype(proj_gap) i = 1; i < proj_gap; ++i)
-      starts[i] = starts[i - 1] + counts[i - 1];
+      starts[i] = std::next(starts[i - 1], counts[i - 1]); //Linear complexity but for random access iterators
    std::vector<InoutIterator> ends = starts;
 
    //Loop on the ranges
@@ -87,7 +87,6 @@ void counting_sort_in_place(InoutIterator first, InoutIterator last, Projection 
       }
    }
 }
-
 
 
 #endif
