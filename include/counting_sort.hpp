@@ -23,10 +23,10 @@ void counting_sort(InoutIterator first, InoutIterator last,
 
    std::vector<std::vector<ValueType>> counts(*max_proj_value + 1);
    for (auto curr = first; curr != last; ++curr, ++proj_first)
-      counts[*proj_first].push_back(*curr);
+      counts[*proj_first].push_back(std::move(*curr));
 
    for (auto& vals : counts)
-      first = std::copy(begin(vals), end(vals), first);
+      first = std::move(begin(vals), end(vals), first);
 }
 
 template<typename InoutIterator, typename Projection>
