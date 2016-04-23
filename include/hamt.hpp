@@ -78,6 +78,9 @@ private:
       if (0 == depth)
          return insert_in_leaf(current, k, v);
       
+      //if (current.m_flags.none())
+      //   return insert_compressed(current, k, v);
+
       std::size_t node_hash = h & BitHMask;
       std::size_t index = index_of(current, node_hash);
       if (!is_there(current, node_hash))
