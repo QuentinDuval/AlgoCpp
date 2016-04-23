@@ -70,32 +70,38 @@ private:
 
    bool insert(key_type const& k, value_type const& v, std::size_t h)
    {
-      node* current = &m_root;
-      std::vector<node*> stack(1, current);
+      return insert_rec(m_root, k, v, h, MaxDepth);
+   }
 
-      for (size_t i = 0; i < MaxDepth; ++i, h = h >> BitCount)
+   static bool insert_rec(node& current, key_type const& k, value_type const& v, std::size_t h, size_t depth)
+   {
+      if (depth == 0)
       {
-         std::size_t node_hash = h & BitHMask;
-         std::size_t index = index_of(*current, node_hash);
-         if (!is_there(*current, node_hash))
+         auto it = find_leaf(current, k);
+         if (it != end(current.m_leaves))
          {
-            current->m_flags.set(node_hash);
-            current->m_childs.insert(begin(current->m_childs) + index, node());
+            it->second = v;
+            return false;
          }
-         current = &current->m_childs[index];
-         stack.push_back(current);
-      }
-
-      auto it = find_leaf(*current, k);
-      if (it != end(current->m_leaves))
-      {
-         it->second = v;
-         return false;
+         else
+         {
+            current.m_leaves.push_back({ k, v });
+            current.m_size++;
+            return true;
+         }
       }
       
-      current->m_leaves.push_back({ k, v });
-      for (auto* n : stack) n->m_size++;
-      return true;
+      std::size_t node_hash = h & BitHMask;
+      std::size_t index = index_of(current, node_hash);
+      if (!is_there(current, node_hash))
+      {
+         current.m_flags.set(node_hash);
+         current.m_childs.insert(begin(current.m_childs) + index, node());
+      }
+
+      bool added = insert_rec(current.m_childs[index], k, v, h >> BitCount, depth-1);
+      if (added) current.m_size++;
+      return added;
    }
 
    std::pair<bool, value_type> find(key_type const& k, std::size_t h) const
@@ -117,24 +123,24 @@ private:
       return it == end(current->m_leaves) ? NotFound : std::make_pair(true, it->second);
    }
 
-   bool is_there(node const& n, std::size_t h) const
+   static bool is_there(node const& n, std::size_t h)
    {
       return n.m_flags.test(h);
    }
 
-   std::size_t index_of(node const& n, std::size_t h) const
+   static std::size_t index_of(node const& n, std::size_t h)
    {
       std::size_t shift = FlagSize - h;
       std::bitset<FlagSize> shifted = n.m_flags << shift; //And not (>>)
       return shifted.count();
    }
 
-   auto find_leaf(node& n, key_type const& k)
+   static auto find_leaf(node& n, key_type const& k)
    {
       return find_if(begin(n.m_leaves), end(n.m_leaves), [&](auto const& p) { return p.first == k; });
    }
 
-   auto find_leaf(node const& n, key_type const& k) const
+   static auto find_leaf(node const& n, key_type const& k)
    {
       return find_if(begin(n.m_leaves), end(n.m_leaves), [&](auto const& p) { return p.first == k; });
    }
