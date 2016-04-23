@@ -55,9 +55,9 @@ public:
       return m_root.m_size;
    }
 
-   bool contains(key_type const& key) const
+   std::size_t count(key_type const& key) const
    {
-      return find(key).first;
+      return find(key).first ? 1 : 0;
    }
 
    bool empty() const
