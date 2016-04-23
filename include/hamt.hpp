@@ -40,9 +40,9 @@ public:
    hash_array_mapped_trie() = default;
    ~hash_array_mapped_trie() = default;
 
-   void insert(key_type const& key, value_type const& value)
+   bool insert(key_type const& key, value_type const& value)
    {
-      insert(key, value, std::hash<key_type>()(key));
+      return insert(key, value, std::hash<key_type>()(key));
    }
 
    std::pair<bool, value_type> find(key_type const& key) const
@@ -68,35 +68,34 @@ public:
 private:
    node m_root;
 
-   void insert(key_type const& k, value_type const& v, std::size_t h)
+   bool insert(key_type const& k, value_type const& v, std::size_t h)
    {
       node* current = &m_root;
+      std::vector<node*> stack(1, current);
+
       for (size_t i = 0; i < MaxDepth; ++i, h = h >> BitCount)
       {
          std::size_t node_hash = h & BitHMask;
+         std::size_t index = index_of(*current, node_hash);
          if (!is_there(*current, node_hash))
          {
-            std::size_t index = index_of(*current, node_hash);
             current->m_flags.set(node_hash);
             current->m_childs.insert(begin(current->m_childs) + index, node());
-            current = &(current->m_childs[index]);
          }
-         else
-         {
-            std::size_t index = index_of(*current, node_hash);
-            current = &current->m_childs[index];
-         }
+         current = &current->m_childs[index];
+         stack.push_back(current);
       }
 
       auto it = find_leaf(*current, k);
       if (it != end(current->m_leaves))
       {
          it->second = v;
+         return false;
       }
-      else
-      {
-         current->m_leaves.push_back({ k, v });
-      }
+      
+      current->m_leaves.push_back({ k, v });
+      for (auto* n : stack) n->m_size++;
+      return true;
    }
 
    std::pair<bool, value_type> find(key_type const& k, std::size_t h) const
@@ -126,7 +125,7 @@ private:
    std::size_t index_of(node const& n, std::size_t h) const
    {
       std::size_t shift = FlagSize - h;
-      std::bitset<FlagSize> shifted = n.m_flags << shift; //Why not >> ???
+      std::bitset<FlagSize> shifted = n.m_flags << shift; //And not (>>)
       return shifted.count();
    }
 
