@@ -75,21 +75,8 @@ private:
 
    static bool insert_rec(node& current, key_type const& k, value_type const& v, std::size_t h, size_t depth)
    {
-      if (depth == 0)
-      {
-         auto it = find_leaf(current, k);
-         if (it != end(current.m_leaves))
-         {
-            it->second = v;
-            return false;
-         }
-         else
-         {
-            current.m_leaves.push_back({ k, v });
-            current.m_size++;
-            return true;
-         }
-      }
+      if (0 == depth)
+         return insert_in_leaf(current, k, v);
       
       std::size_t node_hash = h & BitHMask;
       std::size_t index = index_of(current, node_hash);
@@ -98,10 +85,22 @@ private:
          current.m_flags.set(node_hash);
          current.m_childs.insert(begin(current.m_childs) + index, node());
       }
-
       bool added = insert_rec(current.m_childs[index], k, v, h >> BitCount, depth-1);
       if (added) current.m_size++;
       return added;
+   }
+
+   static bool insert_in_leaf(node& current, key_type const& k, value_type const& v)
+   {
+      auto it = find_leaf(current, k);
+      if (it != end(current.m_leaves))
+      {
+         it->second = v;
+         return false;
+      }
+      current.m_leaves.push_back({ k, v });
+      current.m_size++;
+      return true;
    }
 
    std::pair<bool, value_type> find(key_type const& k, std::size_t h) const
