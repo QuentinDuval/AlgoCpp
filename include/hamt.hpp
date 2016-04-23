@@ -40,9 +40,9 @@ public:
    hash_array_mapped_trie() = default;
    ~hash_array_mapped_trie() = default;
 
-   bool insert(key_type const& key, value_type const& value)
+   bool insert(std::pair<key_type, value_type> const& pair)
    {
-      return insert(key, value, std::hash<key_type>()(key));
+      return insert(pair.first, pair.second, std::hash<key_type>()(pair.first));
    }
 
    std::pair<bool, value_type> find(key_type const& key) const
