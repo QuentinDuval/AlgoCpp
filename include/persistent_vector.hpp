@@ -109,6 +109,7 @@ private:
       if (n->m_kind == kind::leaf)
          return static_cast<leaf_node const*>(n.get())->m_values[index];
 
+      //TODO - Could be done by binary search
       auto* i = static_cast<intern_node const*>(n.get());
       for (auto const& n : i->m_childs)
       {
