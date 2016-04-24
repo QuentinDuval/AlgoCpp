@@ -59,6 +59,13 @@ public:
       return get_size(m_root.get());
    }
 
+   value_type const& at(std::size_t index) const
+   {
+      if (index >= size())
+         throw std::exception("Wrong size");
+      return get_at(m_root, index);
+   }
+
    persistent_vector push_back(value_type const& v) const
    {
       return persistent_vector(push_back(m_root, v));
@@ -93,6 +100,23 @@ private:
       std::shared_ptr<leaf_node> out(new leaf_node());
       out->m_values.push_back(v);
       return out;
+   }
+
+   //--------------------------------------------------------------------------
+
+   static value_type const& get_at(node_ptr const& n, std::size_t index)
+   {
+      if (n->m_kind == kind::leaf)
+         return static_cast<leaf_node const*>(n.get())->m_values[index];
+
+      auto* i = static_cast<intern_node const*>(n.get());
+      for (auto const& n : i->m_childs)
+      {
+         auto size = get_size(n.get());
+         if (index < size)
+            return get_at(n, index);
+         index -= size;
+      }
    }
 
    //--------------------------------------------------------------------------
