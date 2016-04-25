@@ -109,7 +109,8 @@ private:
       if (n->m_kind == kind::leaf)
          return static_cast<leaf_node const*>(n.get())->m_values[index];
 
-      //TODO - Could be done by just dividing
+      //TODO - Could be done by just dividing when updating
+      //TODO - Could be done by selecting the last one when push back
       auto* i = static_cast<intern_node const*>(n.get());
       for (auto const& n : i->m_childs)
       {
