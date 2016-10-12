@@ -5,16 +5,51 @@
 
 
 //-----------------------------------------------------------------------------
+// Easy library to time the duration of functions
+//-----------------------------------------------------------------------------
+
+using Clock = std::chrono::high_resolution_clock;
+
+template <typename Unit>
+using Duration = std::chrono::duration<double, Unit>;
+
+template <typename Unit>
+using TimePoint = std::chrono::time_point<Clock, Duration<Unit>>;
+
+namespace details
+{
+   template<typename Unit, typename Function, typename... Args>
+   Duration<Unit> time_diff(TimePoint<Unit> start, Function&& f, Args&&... args)
+   {
+      f(std::forward<Args>(args)...);
+      return Clock::now() - start;
+   }
+}
+
+template<typename Unit, typename Function, typename... Args>
+Duration<Unit> time_it(Function&& f, Args&&... args)
+{
+   auto start = Clock::now();
+   return details::time_diff(start, f, std::forward<Args>(args)...);
+}
+
+template<typename Unit>
+auto timer_from_now()
+{
+   return [start = Clock::now()](auto f, auto&&... args) {
+      return details::time_diff<Unit>(start, f, args...);
+   };
+}
+
+
+//-----------------------------------------------------------------------------
 // Allows timing the execution of a function, with perfect forwarding of the arguments
 //-----------------------------------------------------------------------------
 
-template <typename Duration>
+template <typename Unit>
 struct scoped_timer
 {
-   using Clock = std::chrono::high_resolution_clock;
-   using TimePoint = std::chrono::time_point < Clock, Duration >;
-
-   scoped_timer(Duration& duration)
+   scoped_timer(Duration<Unit>& duration)
       : m_duration(duration)
       , m_start(Clock::now())
    {}
@@ -25,14 +60,14 @@ struct scoped_timer
    }
 
 private:
-   Duration& m_duration;
-   TimePoint m_start;
+   Duration<Unit>& m_duration;
+   TimePoint<Unit> m_start;
 };
 
-template<typename Duration, typename Fct, typename... Args>
-auto time(Duration& duration, Fct&& fct, Args&&... args)
+template<typename Unit, typename Fct, typename... Args>
+auto time(Duration<Unit>& duration, Fct&& fct, Args&&... args)
 {
-   scoped_timer<Duration> timer(duration);
+   scoped_timer<Unit> timer(duration);
    return fct(forward<Args>(args)...); //Also works for void
 }
 
@@ -42,7 +77,7 @@ auto time(Duration& duration, Fct&& fct, Args&&... args)
 //-----------------------------------------------------------------------------
 
 template<typename Unit = std::milli, typename Fct, typename... Args>
-std::chrono::duration<double, Unit> time_several(std::ostream& output, size_t tries, Fct const& fct, Args&&... args)
+Duration<Unit> time_several(std::ostream& output, size_t tries, Fct const& fct, Args&&... args)
 {
    std::chrono::duration<double, Unit> duration(0);
    for (size_t i = 0; i < tries; ++i)
