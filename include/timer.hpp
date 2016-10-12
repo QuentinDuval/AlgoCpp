@@ -30,7 +30,7 @@ template<typename Unit, typename Function, typename... Args>
 Duration<Unit> time_it(Function&& f, Args&&... args)
 {
    auto start = Clock::now();
-   return details::time_diff(start, f, std::forward<Args>(args)...);
+   return details::time_diff<Unit>(start, f, std::forward<Args>(args)...);
 }
 
 template<typename Unit>
